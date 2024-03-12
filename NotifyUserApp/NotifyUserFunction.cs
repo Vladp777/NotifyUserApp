@@ -29,8 +29,14 @@ namespace NotifyUserApp
         {
             _log.LogInformation($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
 
-            var sasUri = _blobService.CreateBlobSas(name);
             var email = _blobService.GetEmailFromMetadata(name);
+            if (email == null)
+            {
+                _log.LogError("Email is invalid");
+                return;
+            }
+
+            var sasUri = _blobService.CreateBlobSas(name);
 
             var fileName = name.Split(';').Last();
 

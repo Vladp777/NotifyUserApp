@@ -35,7 +35,16 @@ public class BlobService : IBlobService
 
         var properties = blobClient.GetProperties();
         var metadataDic = properties.Value.Metadata;
-        return metadataDic["Email"];
+        var isExist = metadataDic.TryGetValue("Email", out var email);
+        if (isExist)
+        {
+            _log.LogInformation("Email exist");
+
+            return email;
+        }
+
+        _log.LogInformation("Email not found");
+        return null;
     }
 
     public string CreateBlobSas(string blobName)
