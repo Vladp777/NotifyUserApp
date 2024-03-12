@@ -14,12 +14,12 @@ namespace NotifyUserApp
     {
         private readonly IEmailService _emailService;
         private readonly ILogger<NotifyUserFunction> _log;
-        private readonly ISasService _sasService;
-        public NotifyUserFunction(ISasService sasService, 
+        private readonly IBlobService _blobService;
+        public NotifyUserFunction(IBlobService sasService, 
             IEmailService emailService,
             ILogger<NotifyUserFunction> log)
         {
-            _sasService = sasService;
+            _blobService = sasService;
             _emailService = emailService;
             _log = log;
         }
@@ -29,10 +29,10 @@ namespace NotifyUserApp
         {
             _log.LogInformation($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
 
-            var sasUri = _sasService.CreateBlobSas(name);
+            var sasUri = _blobService.CreateBlobSas(name);
+            var email = _blobService.GetEmailFromMetadata(name);
 
-            var email = name.Split('-').First();
-            var fileName = name.Replace(email + "-", "");
+            var fileName = name.Split(';').Last();
 
             var message = GetMassage(fileName, myBlob.Length /1000.0, sasUri);
 

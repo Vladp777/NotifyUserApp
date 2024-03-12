@@ -12,7 +12,7 @@ public class StartUp : FunctionsStartup
     public override void Configure(IFunctionsHostBuilder builder)
     {
         builder.Services.AddScoped<IEmailService, EmailService>();
-        builder.Services.AddScoped<ISasService, SasService>();
+        builder.Services.AddScoped<IBlobService, BlobService>();
         builder.Services.AddLogging();
         builder.Services.AddOptions<BlobConfig>()
             .Configure<IConfiguration>((s, c) =>

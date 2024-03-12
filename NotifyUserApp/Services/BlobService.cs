@@ -5,28 +5,43 @@ using NotifyUserApp.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Reflection.Metadata;
+using System.Threading.Tasks;
 
 namespace NotifyUserApp.Services;
 
-public class SasService : ISasService
+public class BlobService : IBlobService
 {
     private readonly IOptions<BlobConfig> _blobConfig;
-    private readonly ILogger<SasService> _log;
+    private readonly ILogger<BlobService> _log;
 
-    public SasService(IOptions<BlobConfig> blobConfig,
-        ILogger<SasService> log)
+    public BlobService(IOptions<BlobConfig> blobConfig,
+        ILogger<BlobService> log)
     {
         _blobConfig = blobConfig;
         _log = log;
     }
-
-    public string CreateBlobSas(string blobName)
+    private BlobClient GetBlobClient(string blobName)
     {
         BlobServiceClient blobServiceClient = new BlobServiceClient(_blobConfig.Value.ConnectionString);
 
         BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(_blobConfig.Value.ContainerName);
 
-        BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
+        return blobContainerClient.GetBlobClient(blobName);
+    }
+    public string GetEmailFromMetadata(string blobName)
+    {
+        var blobClient = GetBlobClient(blobName);
+
+        var properties = blobClient.GetProperties();
+        var metadataDic = properties.Value.Metadata;
+        return metadataDic["Email"];
+    }
+
+    public string CreateBlobSas(string blobName)
+    {
+        
+        var blobClient = GetBlobClient(blobName);
 
         BlobSasBuilder blobSasBuilder = new BlobSasBuilder()
         {
